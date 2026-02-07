@@ -36,5 +36,32 @@ const createUser = asyncHandler( async (req, res) => {
 
 })
 
+const loginUser = asyncHandler( async (req, res) => {
+    const { email, password } = req.body;
+    // console.log(username, email, password)
 
-export { createUser }
+    if (!email || !password) {
+        throw new ApiError(400, "Please provide all required fields");
+    }
+
+    const existingUser = await User.findOne({ email })
+
+    if(!existingUser) {
+        throw new ApiError(400, "User does not exist with this email");
+    }
+
+    const isPasswordCorrect = await existingUser.isPasswordCorrect(password)
+
+    if(!isPasswordCorrect) {
+        throw new ApiError(400, "Invalid credentials");
+    }
+
+    generateToken(res, existingUser._id)
+
+    const loggedInUser = await User.findById(existingUser._id).select("-password")
+
+    res.status(200).json(new ApiResponse(200, loggedInUser, "User logged in successfully"));
+})
+
+
+export { createUser, loginUser }
