@@ -2,6 +2,7 @@ import User from "../models/userModel.js"
 import asyncHandler from "../middlewares/asyncHandler.js"
 import ApiError from "../utils/ApiError.js";
 import ApiResponse from "../utils/ApiResponse.js";
+import generateToken from "../utils/createToken.js";
 
 const createUser = asyncHandler( async (req, res) => {
     const { username, email, password } = req.body;
@@ -22,6 +23,8 @@ const createUser = asyncHandler( async (req, res) => {
         email,
         password
     });
+
+    generateToken(res, newUser._id)
 
     if(!newUser) {
         throw new ApiError(500, "Failed to create user");
