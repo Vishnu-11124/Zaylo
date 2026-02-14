@@ -138,4 +138,25 @@ const getUserById = asyncHandler( async (req, res) => {
     res.status(200).json(new ApiResponse(200, user, "User fetched successfully"));
 })
 
-export { createUser, loginUser, logoutUser, getAllUsers, getUserProfile, updateUserProfile, deleteUserById, getUserById }
+const updateUserById = asyncHandler( async (req, res) => {
+    const user = await User.findById(req.params.id)
+
+    if(!user) {
+        throw new ApiError(404, "User not found");
+    }
+
+    user.username = req.body.username || user.username
+    user.email = req.body.email || user.email
+    user.isAdmin = Boolean(req.body.isAdmin)
+
+    const updatedUser = await user.save()
+
+    res.status(200).json(new ApiResponse(200, {
+        _id: updatedUser._id,
+        username: updatedUser.username,
+        email: updatedUser.email,
+        isAdmin: updatedUser.isAdmin
+    }, "User updated successfully"));  
+})
+
+export { createUser, loginUser, logoutUser, getAllUsers, getUserProfile, updateUserProfile, deleteUserById, getUserById, updateUserById }
